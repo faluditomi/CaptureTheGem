@@ -10,9 +10,11 @@ using UnityEngine.SceneManagement;
 
 public class NetworkManagerCTG : NetworkManager
 {
-    [SerializeField] private PlayerNetworkInstance playerNetworkInstancePrefab;
+    [SerializeField] private PlayerLobbyInstance playerLobbyInstancePrefab;
+    [SerializeField] private PlayerGameInstance playerGameInstancePrefab;
 
-    public List<PlayerNetworkInstance> players = new List<PlayerNetworkInstance>();
+    public List<PlayerLobbyInstance> playersInLobby = new List<PlayerLobbyInstance>();
+    public List<PlayerGameInstance> playersInGame = new List<PlayerGameInstance>();
 
     [SerializeField] private SceneAsset menuScene;
 
@@ -62,9 +64,9 @@ public class NetworkManagerCTG : NetworkManager
     {
         if(connection.identity)
         {
-            PlayerNetworkInstance player = connection.identity.GetComponent<PlayerNetworkInstance>();
+            PlayerLobbyInstance player = connection.identity.GetComponent<PlayerLobbyInstance>();
 
-            players.Remove(player);
+            playersInLobby.Remove(player);
 
             NotifyPlayersOfReadyState();
         }
@@ -76,9 +78,9 @@ public class NetworkManagerCTG : NetworkManager
     {
         if(SceneManager.GetActiveScene().name.Equals(menuScene.name))
         {
-            bool isLeader = players.Count == 0;
+            bool isLeader = playersInLobby.Count == 0;
 
-            PlayerNetworkInstance playerInstance = Instantiate(playerNetworkInstancePrefab);
+            PlayerLobbyInstance playerInstance = Instantiate(playerLobbyInstancePrefab);
 
             playerInstance.SetIsLeader(isLeader);
 
@@ -88,7 +90,7 @@ public class NetworkManagerCTG : NetworkManager
 
     public void NotifyPlayersOfReadyState()
     {
-        foreach(PlayerNetworkInstance player in players)
+        foreach(PlayerLobbyInstance player in playersInLobby)
         {
             player.HandleReadyToStart(IsReadyToStart());
         }
@@ -96,7 +98,7 @@ public class NetworkManagerCTG : NetworkManager
 
     private bool IsReadyToStart()
     {
-        foreach(PlayerNetworkInstance player in players)
+        foreach(PlayerLobbyInstance player in playersInLobby)
         {
             if(!player.GetIsReady())
             {
@@ -109,11 +111,40 @@ public class NetworkManagerCTG : NetworkManager
 
     public override void OnStopServer()
     {
-        players.Clear();
+        playersInLobby.Clear();
     }
 
-    public List<PlayerNetworkInstance> GetPlayersOnNetwork()
+    public void StartGame()
     {
-        return players;
+        if(SceneManager.GetActiveScene().name.Equals(menuScene.name) && IsReadyToStart())
+        {
+            ServerChangeScene("Map");
+        }
+    }
+
+    public override void ServerChangeScene(string newSceneName)
+    {
+        if(newSceneName.Equals("Map"))
+        {
+            for(int i = GetPlayersInLobby().Count - 1; i >= 0; i--)
+            {
+                NetworkConnectionToClient connection = GetPlayersInLobby()[i].connectionToClient;
+
+                PlayerGameInstance playerGameInstance = Instantiate(playerGameInstancePrefab);
+
+                playerGameInstance.SetDisplayName(GetPlayersInLobby()[i].GetDisplayName());
+
+                NetworkServer.Destroy(connection.identity.gameObject);
+
+                NetworkServer.ReplacePlayerForConnection(connection, playerGameInstance.gameObject);
+            }
+        }
+
+        base.ServerChangeScene(newSceneName);
+    }
+
+    public List<PlayerLobbyInstance> GetPlayersInLobby()
+    {
+        return playersInLobby;
     }
 }

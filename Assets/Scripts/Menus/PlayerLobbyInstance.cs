@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerNetworkInstance : NetworkBehaviour
+public class PlayerLobbyInstance : NetworkBehaviour
 {
     [SerializeField] private GameObject lobbyUI;
 
@@ -14,7 +14,7 @@ public class PlayerNetworkInstance : NetworkBehaviour
 
     [SerializeField] private Button startGameButton = null;
 
-    private NetworkManagerCTG lobby = NetworkManager.singleton as NetworkManagerCTG;
+    private NetworkManagerCTG networkManager = NetworkManager.singleton as NetworkManagerCTG;
 
     private bool isLeader;
     [SyncVar(hook = nameof(HandleReadyStatusChanged))]
@@ -32,14 +32,17 @@ public class PlayerNetworkInstance : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        lobby.players.Add(this);
+        networkManager.playersInLobby.Add(this);
+
+        //gets rid of bug where start button stays active if a 2nd person joins after the first is readied up
+        networkManager.NotifyPlayersOfReadyState();
 
         UpdateUI();
     }
 
     public override void OnStopServer()
     {
-        lobby.players.Remove(this);
+        networkManager.playersInLobby.Remove(this);
 
         UpdateUI();
     }
@@ -58,7 +61,7 @@ public class PlayerNetworkInstance : NetworkBehaviour
     {
         if(!isOwned)
         {
-            foreach(PlayerNetworkInstance player in lobby.players)
+            foreach(PlayerLobbyInstance player in networkManager.playersInLobby)
             {
                 if(player.isOwned)
                 {
@@ -71,18 +74,11 @@ public class PlayerNetworkInstance : NetworkBehaviour
             return;
         }
 
-        // for(int i = 0; i < playerNameTexts.Length; i++)
-        // {
-        //     playerNameTexts[i].text = "Waiting For Player...";
-
-        //     playerReadyTexts[i].text = string.Empty;
-        // }
-
-        for(int i = 0; i < lobby.players.Count; i++)
+        for(int i = 0; i < networkManager.playersInLobby.Count; i++)
         {
-            playerNameTexts[i].text = lobby.players[i].GetDisplayName();
+            playerNameTexts[i].text = networkManager.playersInLobby[i].GetDisplayName();
 
-            playerReadyTexts[i].text = lobby.players[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
+            playerReadyTexts[i].text = networkManager.playersInLobby[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
         }
     }
 
@@ -93,7 +89,7 @@ public class PlayerNetworkInstance : NetworkBehaviour
             return;
         }
 
-        startGameButton.interactable = readyToStart;
+        startGameButton.gameObject.SetActive(readyToStart);
     }
 
     [Command]
@@ -107,15 +103,15 @@ public class PlayerNetworkInstance : NetworkBehaviour
     {
         isReady = !isReady;
 
-        lobby.NotifyPlayersOfReadyState();
+        networkManager.NotifyPlayersOfReadyState();
     }
 
     [Command]
     public void CmdStartGame()
     {
-        if(lobby.players[0].connectionToClient.Equals(connectionToClient))
+        if(networkManager.playersInLobby[0].connectionToClient.Equals(connectionToClient))
         {
-            //start game
+            networkManager.StartGame();
         }
     }
 
@@ -123,13 +119,17 @@ public class PlayerNetworkInstance : NetworkBehaviour
     {
         this.isLeader = isLeader;
 
-        startGameButton.gameObject.SetActive(isLeader);
+        if(GetIsReady())
+        {
+            startGameButton.gameObject.SetActive(isLeader);
+        }
     }
 
     public NetworkManagerCTG GetNetworkManager()
     {
-        return lobby;
+        return networkManager;
     }
+
     public bool GetIsReady()
     {
         return isReady;

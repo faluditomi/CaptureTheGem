@@ -1341,7 +1341,7 @@ GameObject:
   - component: {fileID: 7831347250474096705}
   - component: {fileID: 194627428046629188}
   m_Layer: 0
-  m_Name: Lobby
+  m_Name: PlayerLobbyInstance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

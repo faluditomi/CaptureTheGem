@@ -75,8 +75,10 @@ MonoBehaviour:
     deliveryTimeEmaDuration: 2
   connectionQualityInterval: 3
   timeInterpolationGui: 0
-  playerNetworkInstancePrefab: {fileID: 7831347250474096705, guid: 97f37687525df9a41bb7ab2c5e6f7519, type: 3}
-  players: []
+  playerLobbyInstancePrefab: {fileID: 7831347250474096705, guid: 97f37687525df9a41bb7ab2c5e6f7519, type: 3}
+  playerGameInstancePrefab: {fileID: 549188411948417790, guid: 390d4bcd22a421c4b8e82099a5e20690, type: 3}
+  playersInLobby: []
+  playersInGame: []
   menuScene: {fileID: 102900000, guid: fcb172b51d29af14eb1908333adfcc21, type: 3}
 --- !u!114 &4988773536189243602
 MonoBehaviour:
