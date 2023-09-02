@@ -1,6 +1,5 @@
 using UnityEngine;
 using Mirror;
-using System.Xml.Serialization;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -84,6 +83,12 @@ public class PlayerController : NetworkBehaviour
                 break;
         }
     }
+    
+    [Command]
+    public void CmdSetRotation(Quaternion rotation)
+    {
+        transform.rotation = rotation;
+    }
 
     [Command]
     private void CmdPickUpGem()
@@ -136,11 +141,11 @@ public class PlayerController : NetworkBehaviour
     }
 
     [Command]
-    private void CmdPlayerMovement()
+    private void CmdPlayerMovement(Vector3 movement)
     {
         //validate logic
 
-        PlayerMovement();
+        transform.Translate(movement);
     }
 
     [Command]
@@ -148,17 +153,12 @@ public class PlayerController : NetworkBehaviour
     {
         //validate logic
         
-        PlayerJump();
+        myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
     [Client]
     private void PlayerMovement()
     {
-        // if(!isOwned)
-        // {
-        //     return;
-        // }
-
         // Check if the player is grounded
         isGrounded = Physics.Raycast(collisionCheckPoint.position, Vector3.down, 0.2f);
 
@@ -170,20 +170,15 @@ public class PlayerController : NetworkBehaviour
             movement *= speedMultiplierWithGem;
         }
 
-        transform.Translate(movement);
+        CmdPlayerMovement(movement);
     }
 
     [Client]
     private void PlayerJump()
     {
-        // if(!isOwned)
-        // {
-        //     return;
-        // }
-
         if(isGrounded && Input.GetButtonDown("Jump"))
         {
-            myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            CmdPlayerJump();
         }
     }
 }

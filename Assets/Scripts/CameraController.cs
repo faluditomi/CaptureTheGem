@@ -3,15 +3,28 @@ using Mirror;
 
 public class CameraController : NetworkBehaviour
 {
+    private PlayerController playerController;
+
     [SerializeField] private float mouseSensitivity = 5f;
 
-    private Quaternion playerRotation = Quaternion.identity;
+    private Quaternion rotationHorizontal = Quaternion.identity;
+
+    private Vector3 rotationVertical;
 
     public override void OnStartAuthority()
     {
+        enabled = true;
+
         GetComponent<Camera>().enabled = true;
     }
 
+    [Client]
+    private void Awake()
+    {
+        playerController = GetComponentInParent<PlayerController>();
+    }
+
+    [Client]
     private void Update()
     {
         if(!isOwned)
@@ -25,27 +38,30 @@ public class CameraController : NetworkBehaviour
         float mouseY = Input.GetAxis("Mouse Y");
 
         // Update player's rotation (horizontal)
-        playerRotation *= Quaternion.Euler(0f, mouseX * mouseSensitivity, 0f);
+        rotationHorizontal *= Quaternion.Euler(0f, mouseX * mouseSensitivity, 0f);
 
-        transform.parent.rotation = playerRotation;
+        // transform.parent.rotation = rotationHorizontal;
+        playerController.CmdSetRotation(rotationHorizontal);
 
         // Camera rotation (vertical)
-        // Clamp camera's vertical rotation
-        Vector3 currentRotation = transform.eulerAngles;
+        rotationVertical = transform.eulerAngles;
 
-        currentRotation.x -= mouseY * mouseSensitivity;
+        rotationVertical.x -= mouseY * mouseSensitivity;
 
-        if(currentRotation.x < 270f && currentRotation.x > 180f)
-        {
-            currentRotation.x = 270f;
-        }
-        else if(currentRotation.x > 90f && currentRotation.x < 180f)
-        {
-            currentRotation.x = 90f;
-        }
-
-        transform.eulerAngles = currentRotation;
+        CmdSetCameraRotation();
     }
 
+    private void CmdSetCameraRotation()
+    {
+        if(rotationVertical.x < 270f && rotationVertical.x > 180f)
+        {
+            rotationVertical.x = 270f;
+        }
+        else if(rotationVertical.x > 90f && rotationVertical.x < 180f)
+        {
+            rotationVertical.x = 90f;
+        }
 
+        transform.eulerAngles = rotationVertical;
+    }
 }
