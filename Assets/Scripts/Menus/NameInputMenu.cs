@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
 
-public class NameInput : MonoBehaviour
+public class NameInputMenu : MonoBehaviour
 {
     [SerializeField] private TMP_InputField nameInputField;
 
@@ -48,8 +48,8 @@ public class NameInput : MonoBehaviour
         PlayerPrefs.SetString(playerPrefsNameKey, displayName);
     }
 
-    public static void SetDisplayName(string name)
+    public static string GetDisplayName()
     {
-        displayName = name;
+        return displayName;
     }
 }
