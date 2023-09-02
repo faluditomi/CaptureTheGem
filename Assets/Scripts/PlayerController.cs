@@ -18,6 +18,11 @@ public class PlayerController : NetworkBehaviour
 
     private bool isGrounded;
 
+    public override void OnStartAuthority()
+    {
+        enabled = true;
+    }
+
     [Client]
     private void Awake()
     {
@@ -130,12 +135,33 @@ public class PlayerController : NetworkBehaviour
         gemController.GemReset();
     }
 
+    [Command]
+    private void CmdPlayerMovement()
+    {
+        //validate logic
+
+        PlayerMovement();
+    }
+
+    [Command]
+    private void CmdPlayerJump()
+    {
+        //validate logic
+        
+        PlayerJump();
+    }
+
     [Client]
     private void PlayerMovement()
     {
+        // if(!isOwned)
+        // {
+        //     return;
+        // }
+
         // Check if the player is grounded
         isGrounded = Physics.Raycast(collisionCheckPoint.position, Vector3.down, 0.2f);
-        
+
         // Player movement
         Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical")) * movementSpeed * Time.deltaTime;
 
@@ -144,43 +170,20 @@ public class PlayerController : NetworkBehaviour
             movement *= speedMultiplierWithGem;
         }
 
-        CmdPlayerMovement(movement);
+        transform.Translate(movement);
     }
 
     [Client]
     private void PlayerJump()
     {
+        // if(!isOwned)
+        // {
+        //     return;
+        // }
+
         if(isGrounded && Input.GetButtonDown("Jump"))
         {
-            CmdPlayerJump();
+            myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
-    }
-
-    [Command]
-    private void CmdPlayerMovement(Vector3 movement)
-    {
-        //validate logic
-
-        RpcPlayerMovement(movement);
-    }
-
-    [Command]
-    private void CmdPlayerJump()
-    {
-        //validate logic
-
-        RpcPlayerJump();
-    }
-
-    [ClientRpc]
-    private void RpcPlayerMovement(Vector3 movement)
-    {
-        transform.Translate(movement);
-    }
-
-    [ClientRpc]
-    private void RpcPlayerJump()
-    {
-        myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 }

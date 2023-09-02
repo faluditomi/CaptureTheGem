@@ -1,13 +1,24 @@
 using UnityEngine;
+using Mirror;
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     [SerializeField] private float mouseSensitivity = 5f;
 
     private Quaternion playerRotation = Quaternion.identity;
 
+    public override void OnStartAuthority()
+    {
+        GetComponent<Camera>().enabled = true;
+    }
+
     private void Update()
     {
+        if(!isOwned)
+        {
+            return;
+        }
+
         // Mouse-based character rotation (horizontal)
         float mouseX = Input.GetAxis("Mouse X");
         
