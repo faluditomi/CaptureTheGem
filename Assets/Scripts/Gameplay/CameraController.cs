@@ -7,9 +7,11 @@ public class CameraController : NetworkBehaviour
 
     [SerializeField] private float mouseSensitivity = 5f;
 
-    private Quaternion rotationHorizontal = Quaternion.identity;
+    private Quaternion rotationHorizontal;
 
     private Vector3 rotationVertical;
+
+    private bool canLook = true;
 
     public override void OnStartAuthority()
     {
@@ -25,9 +27,15 @@ public class CameraController : NetworkBehaviour
     }
 
     [Client]
+    private void Start()
+    {
+        rotationHorizontal = transform.rotation;
+    }
+
+    [Client]
     private void Update()
     {
-        if(!isOwned)
+        if(!isOwned || !canLook)
         {
             return;
         }
@@ -40,7 +48,6 @@ public class CameraController : NetworkBehaviour
         // Update player's rotation (horizontal)
         rotationHorizontal *= Quaternion.Euler(0f, mouseX * mouseSensitivity, 0f);
 
-        // transform.parent.rotation = rotationHorizontal;
         playerController.CmdSetRotation(rotationHorizontal);
 
         // Camera rotation (vertical)
@@ -48,11 +55,6 @@ public class CameraController : NetworkBehaviour
 
         rotationVertical.x -= mouseY * mouseSensitivity;
 
-        CmdSetCameraRotation();
-    }
-
-    private void CmdSetCameraRotation()
-    {
         if(rotationVertical.x < 270f && rotationVertical.x > 180f)
         {
             rotationVertical.x = 270f;
@@ -63,5 +65,11 @@ public class CameraController : NetworkBehaviour
         }
 
         transform.eulerAngles = rotationVertical;
+    }
+
+    [Client]
+    public void SetCanLook(bool canLook)
+    {
+        this.canLook = canLook;
     }
 }

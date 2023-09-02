@@ -20,6 +20,9 @@ public class NetworkManagerCTG : NetworkManager
 
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
+    public static event Action<NetworkConnectionToClient> OnServerReadied;
+
+    [SerializeField] private GameObject playerSpawner;
 
     public override void OnStartServer()
     {
@@ -124,23 +127,34 @@ public class NetworkManagerCTG : NetworkManager
 
     public override void ServerChangeScene(string newSceneName)
     {
-        if(newSceneName.Equals("Map"))
+        for(int i = GetPlayersInLobby().Count - 1; i >= 0; i--)
         {
-            for(int i = GetPlayersInLobby().Count - 1; i >= 0; i--)
-            {
-                NetworkConnectionToClient connection = GetPlayersInLobby()[i].connectionToClient;
+            NetworkConnectionToClient connection = GetPlayersInLobby()[i].connectionToClient;
 
-                PlayerGameInstance playerGameInstance = Instantiate(playerGameInstancePrefab);
+            PlayerGameInstance playerGameInstance = Instantiate(playerGameInstancePrefab);
 
-                playerGameInstance.SetDisplayName(GetPlayersInLobby()[i].GetDisplayName());
+            playerGameInstance.SetDisplayName(GetPlayersInLobby()[i].GetDisplayName());
 
-                NetworkServer.Destroy(connection.identity.gameObject);
+            NetworkServer.Destroy(connection.identity.gameObject);
 
-                NetworkServer.ReplacePlayerForConnection(connection, playerGameInstance.gameObject);
-            }
+            NetworkServer.ReplacePlayerForConnection(connection, playerGameInstance.gameObject);
         }
 
         base.ServerChangeScene(newSceneName);
+    }
+
+    public override void OnServerSceneChanged(string sceneName)
+    {
+        GameObject playerSpawnerInstance = Instantiate(playerSpawner);
+
+        NetworkServer.Spawn(playerSpawnerInstance);
+    }
+
+    public override void OnServerReady(NetworkConnectionToClient connection)
+    {
+        OnServerReadied?.Invoke(connection);
+        
+        base.OnServerReady(connection);
     }
 
     public List<PlayerLobbyInstance> GetPlayersInLobby()
