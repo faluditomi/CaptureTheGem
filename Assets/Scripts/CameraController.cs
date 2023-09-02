@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour
 
     private Quaternion playerRotation = Quaternion.identity;
 
-    void Update()
+    private void Update()
     {
         // Mouse-based character rotation (horizontal)
         float mouseX = Input.GetAxis("Mouse X");
@@ -35,4 +35,6 @@ public class CameraController : MonoBehaviour
 
         transform.eulerAngles = currentRotation;
     }
+
+
 }

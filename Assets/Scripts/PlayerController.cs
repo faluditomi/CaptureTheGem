@@ -1,6 +1,8 @@
 using UnityEngine;
+using Mirror;
+using System.Xml.Serialization;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     private GemController gemController;
 
@@ -16,6 +18,7 @@ public class PlayerController : MonoBehaviour
 
     private bool isGrounded;
 
+    [Client]
     private void Awake()
     {
         gemController = FindObjectOfType<GemController>();
@@ -25,6 +28,7 @@ public class PlayerController : MonoBehaviour
         myGem = transform.Find("Gem").gameObject;
     }
 
+    [Client]
     private void Start()
     {
         collisionCheckPoint = new GameObject("CollisionCheckPoint").transform;
@@ -36,46 +40,97 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    [Client]
     private void Update()
     {
+        if(!isOwned)
+        {
+            return;
+        }
+
         PlayerMovement();
+
+        PlayerJump();
     }
 
+    [Client]
     private void OnTriggerEnter(Collider other)
     {
+        if(!isOwned)
+        {
+            return;
+        }
+
         switch(other.transform.tag)
         {
             case "Gem":
-                myGem.SetActive(true);
-
-                gemController.GemPickedUp();
+                CmdPickUpGem();
                 
                 break;
 
             case "Player":
-                if(myGem.activeInHierarchy)
-                {
-                    myGem.SetActive(false);
-
-                    gemController.GemDropped(transform.position);
-                }
+                CmdDropGem();
                 
                 break;
 
             case "ScoreTrigger":
-                if((other.transform.parent.name.Contains("One") && name.Contains("One") ||
-                (other.transform.parent.name.Contains("Two") && name.Contains("Two"))) &&
-                myGem.activeInHierarchy)
-                {
-                    myGem.SetActive(false);
-
-                    gemController.GemReset();
-                }
+                CmdResetGem(other.transform.parent.name);
 
                 break;
         }
     }
 
+    [Command]
+    private void CmdPickUpGem()
+    {
+        RpcPickUpGem();
+    }
+
+    [Command]
+    private void CmdDropGem()
+    {
+        if(myGem.activeInHierarchy)
+        {
+            RpcDropGem();
+        }
+    }
+
+    [Command]
+    private void CmdResetGem(string name)
+    {
+        if((name.Contains("One") && this.name.Contains("One") ||
+        (name.Contains("Two") && this.name.Contains("Two"))) &&
+        myGem.activeInHierarchy)
+        {
+            RpcResetGem();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPickUpGem()
+    {
+        myGem.SetActive(true);
+
+        gemController.GemPickedUp();
+    }
+
+    [ClientRpc]
+    private void RpcDropGem()
+    {
+        myGem.SetActive(false);
+
+        gemController.GemDropped(transform.position);
+    }
+
+    [ClientRpc]
+    private void RpcResetGem()
+    {
+        myGem.SetActive(false);
+
+        gemController.GemReset();
+    }
+
+    [Client]
     private void PlayerMovement()
     {
         // Check if the player is grounded
@@ -89,12 +144,43 @@ public class PlayerController : MonoBehaviour
             movement *= speedMultiplierWithGem;
         }
 
-        transform.Translate(movement);
+        CmdPlayerMovement(movement);
+    }
 
-        // Jumping
-        if (isGrounded && Input.GetButtonDown("Jump"))
+    [Client]
+    private void PlayerJump()
+    {
+        if(isGrounded && Input.GetButtonDown("Jump"))
         {
-            myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            CmdPlayerJump();
         }
+    }
+
+    [Command]
+    private void CmdPlayerMovement(Vector3 movement)
+    {
+        //validate logic
+
+        RpcPlayerMovement(movement);
+    }
+
+    [Command]
+    private void CmdPlayerJump()
+    {
+        //validate logic
+
+        RpcPlayerJump();
+    }
+
+    [ClientRpc]
+    private void RpcPlayerMovement(Vector3 movement)
+    {
+        transform.Translate(movement);
+    }
+
+    [ClientRpc]
+    private void RpcPlayerJump()
+    {
+        myRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 }
