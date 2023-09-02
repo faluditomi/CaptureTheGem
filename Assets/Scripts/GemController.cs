@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class GemController : MonoBehaviour
+public class GemController : NetworkBehaviour
 {
     private MeshRenderer myMeshRenderer;
 
@@ -22,14 +23,16 @@ public class GemController : MonoBehaviour
     }
 
     //even tho barely anything happens in it, I made it a class so it's easier to trace and so that we can append it later
-    public void GemPickedUp()
+    [Command]
+    public void CmdGemPickedUp()
     {
         myMeshRenderer.enabled = false;
 
         myCollider.enabled = false;
     }
 
-    public void GemDropped(Vector3 posOfCollision)
+    [Command]
+    public void CmdGemDropped(Vector3 posOfCollision)
     {
         transform.position = new Vector3(posOfCollision.x, 6f, posOfCollision.z);
 
@@ -42,7 +45,8 @@ public class GemController : MonoBehaviour
         myRigidbody.AddForce(direction * bounceForce, ForceMode.Impulse);
     }
 
-    public void GemReset()
+    [Command]
+    public void CmdGemReset()
     {
         transform.position = new Vector3(0f, 6f, 0f);
 

@@ -27,6 +27,7 @@ public class PlayerController : NetworkBehaviour
     {
         gemController = FindObjectOfType<GemController>();
 
+
         myRigidbody = GetComponent<Rigidbody>();
 
         myGem = transform.Find("Gem").gameObject;
@@ -35,6 +36,8 @@ public class PlayerController : NetworkBehaviour
     [Client]
     private void Start()
     {
+        // CmdAssignAuthorityOverGem();
+
         collisionCheckPoint = new GameObject("CollisionCheckPoint").transform;
 
         collisionCheckPoint.parent = transform;
@@ -83,6 +86,12 @@ public class PlayerController : NetworkBehaviour
                 break;
         }
     }
+
+    // [Command]
+    // private void CmdAssignAuthorityOverGem()
+    // {
+    //     gemController.GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
+    // }
     
     [Command]
     public void CmdSetRotation(Quaternion rotation)
@@ -108,8 +117,8 @@ public class PlayerController : NetworkBehaviour
     [Command]
     private void CmdResetGem(string name)
     {
-        if((name.Contains("One") && this.name.Contains("One") ||
-        (name.Contains("Two") && this.name.Contains("Two"))) &&
+        if(/*(name.Contains("One") && this.name.Contains("One") ||
+        (name.Contains("Two") && this.name.Contains("Two"))) &&*/
         myGem.activeInHierarchy)
         {
             RpcResetGem();
@@ -121,7 +130,7 @@ public class PlayerController : NetworkBehaviour
     {
         myGem.SetActive(true);
 
-        gemController.GemPickedUp();
+        gemController.CmdGemPickedUp();
     }
 
     [ClientRpc]
@@ -129,7 +138,7 @@ public class PlayerController : NetworkBehaviour
     {
         myGem.SetActive(false);
 
-        gemController.GemDropped(transform.position);
+        gemController.CmdGemDropped(transform.position);
     }
 
     [ClientRpc]
@@ -137,7 +146,7 @@ public class PlayerController : NetworkBehaviour
     {
         myGem.SetActive(false);
 
-        gemController.GemReset();
+        gemController.CmdGemReset();
     }
 
     [Command]
