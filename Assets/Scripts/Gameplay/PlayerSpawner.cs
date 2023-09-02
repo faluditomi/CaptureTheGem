@@ -44,6 +44,15 @@ public class PlayerSpawner : NetworkBehaviour
 
         NetworkServer.Spawn(playerInstance, connection);
 
+        if(nextIndex == 0)
+        {
+            playerInstance.GetComponent<MeshRenderer>().material.color = Color.red;
+        }
+        else if(nextIndex == 1)
+        {
+            playerInstance.GetComponent<MeshRenderer>().material.color = Color.blue;
+        }
+
         playerInstance.GetComponentInChildren<CameraController>().SetCanLook(true);
 
         nextIndex++;

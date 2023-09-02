@@ -86,12 +86,6 @@ public class PlayerController : NetworkBehaviour
                 break;
         }
     }
-
-    // [Command]
-    // private void CmdAssignAuthorityOverGem()
-    // {
-    //     gemController.GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
-    // }
     
     [Command]
     public void CmdSetRotation(Quaternion rotation)
@@ -103,6 +97,8 @@ public class PlayerController : NetworkBehaviour
     private void CmdPickUpGem()
     {
         RpcPickUpGem();
+
+        gemController.RpcGemPickedUp();
     }
 
     [Command]
@@ -111,6 +107,8 @@ public class PlayerController : NetworkBehaviour
         if(myGem.activeInHierarchy)
         {
             RpcDropGem();
+
+            gemController.RpcGemDropped(transform.position);
         }
     }
 
@@ -122,6 +120,8 @@ public class PlayerController : NetworkBehaviour
         myGem.activeInHierarchy)
         {
             RpcResetGem();
+
+            gemController.RpcGemReset();
         }
     }
 
@@ -129,24 +129,18 @@ public class PlayerController : NetworkBehaviour
     private void RpcPickUpGem()
     {
         myGem.SetActive(true);
-
-        gemController.CmdGemPickedUp();
     }
 
     [ClientRpc]
     private void RpcDropGem()
     {
         myGem.SetActive(false);
-
-        gemController.CmdGemDropped(transform.position);
     }
 
     [ClientRpc]
     private void RpcResetGem()
     {
         myGem.SetActive(false);
-
-        gemController.CmdGemReset();
     }
 
     [Command]

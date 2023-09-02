@@ -23,16 +23,16 @@ public class GemController : NetworkBehaviour
     }
 
     //even tho barely anything happens in it, I made it a class so it's easier to trace and so that we can append it later
-    [Command]
-    public void CmdGemPickedUp()
+    [ClientRpc]
+    public void RpcGemPickedUp()
     {
         myMeshRenderer.enabled = false;
 
         myCollider.enabled = false;
     }
 
-    [Command]
-    public void CmdGemDropped(Vector3 posOfCollision)
+    [ClientRpc]
+    public void RpcGemDropped(Vector3 posOfCollision)
     {
         transform.position = new Vector3(posOfCollision.x, 6f, posOfCollision.z);
 
@@ -45,8 +45,8 @@ public class GemController : NetworkBehaviour
         myRigidbody.AddForce(direction * bounceForce, ForceMode.Impulse);
     }
 
-    [Command]
-    public void CmdGemReset()
+    [ClientRpc]
+    public void RpcGemReset()
     {
         transform.position = new Vector3(0f, 6f, 0f);
 
