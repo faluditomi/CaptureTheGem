@@ -121,7 +121,7 @@ public class PlayerController : NetworkBehaviour
         {
             RpcToggleGemIndicator(false);
 
-            // gameInstance?.Score();
+            gameInstance?.Score();
 
             gemController.RpcGemReset();
         }
