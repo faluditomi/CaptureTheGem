@@ -17,7 +17,9 @@ public class NetworkManagerCTG : NetworkManager
     private List<PlayerLobbyInstance> playersInLobby = new List<PlayerLobbyInstance>();
     private List<PlayerGameInstance> playersInGame = new List<PlayerGameInstance>();
 
-    [SerializeField] private SceneAsset menuScene;
+    // Switched out this variable as I am having last minute build problems.
+    // [Scene] [SerializeField] private string menuScene;
+    private string menuScene = "Lobby";
 
     // We save outselves a lot of method calls and lines of code by using these events.
     public static event Action OnClientConnected;
@@ -84,7 +86,7 @@ public class NetworkManagerCTG : NetworkManager
     in the lobby anymore. */ 
     public override void OnServerConnect(NetworkConnectionToClient connection)
     {
-        if(numPlayers >= maxConnections || !SceneManager.GetActiveScene().name.Equals(menuScene.name))
+        if(numPlayers >= maxConnections || !SceneManager.GetActiveScene().name.Equals(menuScene))
         {
             connection.Disconnect();
 
@@ -104,7 +106,7 @@ public class NetworkManagerCTG : NetworkManager
     The one that created the room and joined first. */ 
     public override void OnServerAddPlayer(NetworkConnectionToClient connection)
     {
-        if(SceneManager.GetActiveScene().name.Equals(menuScene.name))
+        if(SceneManager.GetActiveScene().name.Equals(menuScene))
         {
             bool isLeader = playersInLobby.Count == 0;
 
@@ -196,7 +198,7 @@ public class NetworkManagerCTG : NetworkManager
     we will move to the map. */ 
     public void StartGame()
     {
-        if(SceneManager.GetActiveScene().name.Equals(menuScene.name) && IsReadyToStart())
+        if(SceneManager.GetActiveScene().name.Equals(menuScene) && IsReadyToStart())
         {
             ServerChangeScene("Map");
         }
