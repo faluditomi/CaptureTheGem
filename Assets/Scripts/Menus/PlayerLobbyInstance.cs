@@ -7,20 +7,20 @@ using UnityEngine.UI;
 
 public class PlayerLobbyInstance : NetworkBehaviour
 {
+    private NetworkManagerCTG networkManager = NetworkManager.singleton as NetworkManagerCTG;
+
     [SerializeField] private GameObject lobbyUI;
 
-    [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
-    [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
+    [SerializeField] private TMP_Text[] nameTexts = new TMP_Text[2];
+    [SerializeField] private TMP_Text[] readyTexts = new TMP_Text[2];
 
     [SerializeField] private Button startGameButton = null;
 
-    private NetworkManagerCTG networkManager = NetworkManager.singleton as NetworkManagerCTG;
-
     private bool isLeader;
-    [SyncVar(hook = nameof(HandleReadyStatusChanged))]
+    [SyncVar(hook = nameof(HandleReadyStatusChange))]
     private bool isReady;
 
-    [SyncVar(hook = nameof(HandleDisplayNameChanged))]
+    [SyncVar(hook = nameof(HandleDisplayNameChange))]
     private string displayName = "Loading...";
 
     public override void OnStartAuthority()
@@ -47,12 +47,12 @@ public class PlayerLobbyInstance : NetworkBehaviour
         UpdateUI();
     }
 
-    public void HandleReadyStatusChanged(bool oldValue, bool newValue)
+    public void HandleReadyStatusChange(bool oldValue, bool newValue)
     {
         UpdateUI();
     }
 
-    public void HandleDisplayNameChanged(string oldValue, string newValue)
+    public void HandleDisplayNameChange(string oldValue, string newValue)
     {
         UpdateUI();
     }
@@ -76,9 +76,9 @@ public class PlayerLobbyInstance : NetworkBehaviour
 
         for(int i = 0; i < networkManager.playersInLobby.Count; i++)
         {
-            playerNameTexts[i].text = networkManager.playersInLobby[i].GetDisplayName();
+            nameTexts[i].text = networkManager.playersInLobby[i].GetDisplayName();
 
-            playerReadyTexts[i].text = networkManager.playersInLobby[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
+            readyTexts[i].text = networkManager.playersInLobby[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
         }
     }
 
@@ -123,11 +123,6 @@ public class PlayerLobbyInstance : NetworkBehaviour
         {
             startGameButton.gameObject.SetActive(isLeader);
         }
-    }
-
-    public NetworkManagerCTG GetNetworkManager()
-    {
-        return networkManager;
     }
 
     public bool GetIsReady()

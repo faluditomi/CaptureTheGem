@@ -1379,10 +1379,10 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   lobbyUI: {fileID: 6646969695134839963}
-  playerNameTexts:
+  nameTexts:
   - {fileID: 3538879476822865492}
   - {fileID: 2651092600807758329}
-  playerReadyTexts:
+  readyTexts:
   - {fileID: 3832818263108449744}
   - {fileID: 1124068729269137524}
   startGameButton: {fileID: 1263702534066542748}
