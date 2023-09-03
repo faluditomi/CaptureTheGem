@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
@@ -84,7 +83,7 @@ public class PlayerSpawner : NetworkBehaviour
 
         // This is the place I found where I could most easily link the PlayerGameInstance and the PlayerController,
         // so that we can manipulate the player scores later on.
-        playerInstance.GetComponent<PlayerController>().SetGameInstance(networkManager.playersInGame[nextIndex].GetComponent<PlayerGameInstance>());
+        playerInstance.GetComponent<PlayerController>().SetGameInstance(networkManager.GetPlayersInGame()[nextIndex].GetComponent<PlayerGameInstance>());
 
         // This is here because I had a bug with the rotations not being taken into account during instantiation
         // because the camera was already manipulating the variable.

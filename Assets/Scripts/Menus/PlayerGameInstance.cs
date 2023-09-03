@@ -24,7 +24,7 @@ public class PlayerGameInstance : NetworkBehaviour
     {
         DontDestroyOnLoad(gameObject);
         
-        networkManager.playersInGame.Add(this);
+        networkManager.GetPlayersInGame().Add(this);
 
         gameHUD.SetActive(true);
 
@@ -33,7 +33,7 @@ public class PlayerGameInstance : NetworkBehaviour
 
     public override void OnStopServer()
     {
-        networkManager.playersInGame.Remove(this);
+        networkManager.GetPlayersInGame().Remove(this);
     }
 
     public void HandleScoreChange(int oldValue, int newValue)
@@ -45,7 +45,7 @@ public class PlayerGameInstance : NetworkBehaviour
     {
         if(!isOwned)
         {
-            foreach(PlayerGameInstance player in networkManager.playersInGame)
+            foreach(PlayerGameInstance player in networkManager.GetPlayersInGame())
             {
                 if(player.isOwned)
                 {
@@ -58,13 +58,13 @@ public class PlayerGameInstance : NetworkBehaviour
             return;
         }
 
-        for(int i = 0; i < networkManager.playersInGame.Count; i++)
+        for(int i = 0; i < networkManager.GetPlayersInGame().Count; i++)
         {
-            nameTexts[i].text = networkManager.playersInGame[i].GetDisplayName();
+            nameTexts[i].text = networkManager.GetPlayersInGame()[i].GetDisplayName();
 
             if(nameTexts[i].text != string.Empty)
             {
-                scoreTexts[i].text = networkManager.playersInGame[i].GetScore().ToString();
+                scoreTexts[i].text = networkManager.GetPlayersInGame()[i].GetScore().ToString();
             }
         }
     }

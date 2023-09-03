@@ -32,7 +32,7 @@ public class PlayerLobbyInstance : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        networkManager.playersInLobby.Add(this);
+        networkManager.GetPlayersInLobby().Add(this);
 
         //gets rid of bug where start button stays active if a 2nd person joins after the first is readied up
         networkManager.NotifyPlayersOfReadyState();
@@ -42,7 +42,7 @@ public class PlayerLobbyInstance : NetworkBehaviour
 
     public override void OnStopServer()
     {
-        networkManager.playersInLobby.Remove(this);
+        networkManager.GetPlayersInLobby().Remove(this);
 
         UpdateUI();
     }
@@ -61,7 +61,7 @@ public class PlayerLobbyInstance : NetworkBehaviour
     {
         if(!isOwned)
         {
-            foreach(PlayerLobbyInstance player in networkManager.playersInLobby)
+            foreach(PlayerLobbyInstance player in networkManager.GetPlayersInLobby())
             {
                 if(player.isOwned)
                 {
@@ -74,11 +74,11 @@ public class PlayerLobbyInstance : NetworkBehaviour
             return;
         }
 
-        for(int i = 0; i < networkManager.playersInLobby.Count; i++)
+        for(int i = 0; i < networkManager.GetPlayersInLobby().Count; i++)
         {
-            nameTexts[i].text = networkManager.playersInLobby[i].GetDisplayName();
+            nameTexts[i].text = networkManager.GetPlayersInLobby()[i].GetDisplayName();
 
-            readyTexts[i].text = networkManager.playersInLobby[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
+            readyTexts[i].text = networkManager.GetPlayersInLobby()[i].GetIsReady() ? "<color=green>Ready</color>" : "<color=red>Not Ready</color>";
         }
     }
 
@@ -109,7 +109,7 @@ public class PlayerLobbyInstance : NetworkBehaviour
     [Command]
     public void CmdStartGame()
     {
-        if(networkManager.playersInLobby[0].connectionToClient.Equals(connectionToClient))
+        if(networkManager.GetPlayersInLobby()[0].connectionToClient.Equals(connectionToClient))
         {
             networkManager.StartGame();
         }
