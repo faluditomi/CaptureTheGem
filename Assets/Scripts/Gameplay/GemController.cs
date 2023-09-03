@@ -5,15 +5,21 @@ using UnityEngine;
 
 public class GemController : NetworkBehaviour
 {
+    #region Attributes
     private MeshRenderer myMeshRenderer;
 
+    // We want to keep track of both the trigger and the normal collider of the gem.
     private Collider[] myColliders = new Collider[2];
 
     private Rigidbody myRigidbody;
 
+    [Tooltip("How far the gem is thrown when it is dropped by a player.")]
     [SerializeField] private float bounceForce = 2f;
+    [Tooltip("How much time passes between getting a score and the gem reseting.")]
     [SerializeField] private float gemResetDelay = 2f;
+    #endregion
 
+    #region MonoBehaviour Methods
     private void Awake()
     {
         myMeshRenderer = GetComponent<MeshRenderer>();
@@ -22,8 +28,11 @@ public class GemController : NetworkBehaviour
 
         myRigidbody = GetComponent<Rigidbody>();
     }
+    #endregion
 
-    //even tho barely anything happens in it, I made it a class so it's easier to trace and so that we can append it later
+    #region RPCs
+    /* Makes the gem invisible and untouchable while it's "picked up", instead
+    of destroying it. */
     [ClientRpc]
     public void RpcGemPickedUp()
     {
@@ -37,6 +46,8 @@ public class GemController : NetworkBehaviour
         }
     }
 
+    /* Brings the gem back in the game, placing it above the players and throwing
+    it in a random direction, so that it doesn't predictably land on either player. */
     [ClientRpc]
     public void RpcGemDropped(Vector3 posOfCollision)
     {
@@ -56,6 +67,9 @@ public class GemController : NetworkBehaviour
         myRigidbody.AddForce(direction * bounceForce, ForceMode.Impulse);
     }
 
+    
+    /* Similar to the RpcGemDropped, but the gem is returned to the middle of the Map and
+    it isn't thrown. */
     [ClientRpc]
     private void RpcGemReset()
     {
@@ -70,11 +84,15 @@ public class GemController : NetworkBehaviour
             collider.enabled = true;
         }
     }
+    #endregion
 
+    #region Coroutines
+    /* Takes care of the delay between scoring and resetting the gem. */
     public IEnumerator ResetGemBehaviour()
     {
         yield return new WaitForSeconds(gemResetDelay);
 
         RpcGemReset();
     }
+    #endregion
 }
