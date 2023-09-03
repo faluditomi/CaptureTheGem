@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PlayerSpawner : NetworkBehaviour
 {
+    private NetworkManagerCTG networkManager = NetworkManager.singleton as NetworkManagerCTG;
+
     [SerializeField] private GameObject playerPrefab;
 
     private static List<Transform> spawnPoints = new List<Transform>();
@@ -47,11 +49,17 @@ public class PlayerSpawner : NetworkBehaviour
         if(nextIndex == 0)
         {
             playerInstance.GetComponent<MeshRenderer>().material.color = Color.red;
+
+            playerInstance.GetComponent<PlayerController>().SetGoalIndicator("One");
         }
         else if(nextIndex == 1)
         {
             playerInstance.GetComponent<MeshRenderer>().material.color = Color.blue;
+
+            playerInstance.GetComponent<PlayerController>().SetGoalIndicator("Two");
         }
+
+        playerInstance.GetComponent<PlayerController>().SetGameInstance(networkManager.playersInGame[nextIndex].GetComponent<PlayerGameInstance>());
 
         playerInstance.GetComponentInChildren<CameraController>().SetCanLook(true);
 

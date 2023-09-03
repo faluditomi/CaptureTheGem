@@ -3,6 +3,8 @@ using Mirror;
 
 public class PlayerController : NetworkBehaviour
 {
+    private PlayerGameInstance gameInstance;
+
     private GemController gemController;
 
     private Rigidbody myRigidbody;
@@ -15,8 +17,11 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float speedMultiplierWithGem = 0.8f;
     [SerializeField] private float jumpForce = 6f;
 
+    private string goalIndicator = string.Empty;
+
     private bool isGrounded;
 
+    [Client]
     public override void OnStartAuthority()
     {
         enabled = true;
@@ -27,7 +32,6 @@ public class PlayerController : NetworkBehaviour
     {
         gemController = FindObjectOfType<GemController>();
 
-
         myRigidbody = GetComponent<Rigidbody>();
 
         myGem = transform.Find("Gem").gameObject;
@@ -36,8 +40,6 @@ public class PlayerController : NetworkBehaviour
     [Client]
     private void Start()
     {
-        // CmdAssignAuthorityOverGem();
-
         collisionCheckPoint = new GameObject("CollisionCheckPoint").transform;
 
         collisionCheckPoint.parent = transform;
@@ -81,7 +83,7 @@ public class PlayerController : NetworkBehaviour
                 break;
 
             case "ScoreTrigger":
-                CmdResetGem(other.transform.parent.name);
+                CmdResetGem(other.name);
 
                 break;
         }
@@ -96,7 +98,7 @@ public class PlayerController : NetworkBehaviour
     [Command]
     private void CmdPickUpGem()
     {
-        RpcPickUpGem();
+        RpcToggleGemIndicator(true);
 
         gemController.RpcGemPickedUp();
     }
@@ -106,7 +108,7 @@ public class PlayerController : NetworkBehaviour
     {
         if(myGem.activeInHierarchy)
         {
-            RpcDropGem();
+            RpcToggleGemIndicator(false);
 
             gemController.RpcGemDropped(transform.position);
         }
@@ -115,32 +117,20 @@ public class PlayerController : NetworkBehaviour
     [Command]
     private void CmdResetGem(string name)
     {
-        if(/*(name.Contains("One") && this.name.Contains("One") ||
-        (name.Contains("Two") && this.name.Contains("Two"))) &&*/
-        myGem.activeInHierarchy)
+        if(name.Contains(goalIndicator) && myGem.activeInHierarchy)
         {
-            RpcResetGem();
+            RpcToggleGemIndicator(false);
+
+            // gameInstance?.Score();
 
             gemController.RpcGemReset();
         }
     }
 
     [ClientRpc]
-    private void RpcPickUpGem()
+    private void RpcToggleGemIndicator(bool state)
     {
-        myGem.SetActive(true);
-    }
-
-    [ClientRpc]
-    private void RpcDropGem()
-    {
-        myGem.SetActive(false);
-    }
-
-    [ClientRpc]
-    private void RpcResetGem()
-    {
-        myGem.SetActive(false);
+        myGem.SetActive(state);
     }
 
     [Command]
@@ -183,5 +173,15 @@ public class PlayerController : NetworkBehaviour
         {
             CmdPlayerJump();
         }
+    }
+
+    public void SetGoalIndicator(string goalIndicator)
+    {
+        this.goalIndicator = goalIndicator;
+    }
+
+    public void SetGameInstance(PlayerGameInstance gameInstance)
+    {
+        this.gameInstance = gameInstance;
     }
 }
