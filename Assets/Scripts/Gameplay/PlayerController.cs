@@ -123,7 +123,7 @@ public class PlayerController : NetworkBehaviour
 
             gameInstance?.Score();
 
-            gemController.RpcGemReset();
+            StartCoroutine(gemController.ResetGemBehaviour());
         }
     }
 

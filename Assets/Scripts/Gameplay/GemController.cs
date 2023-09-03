@@ -12,6 +12,7 @@ public class GemController : NetworkBehaviour
     private Rigidbody myRigidbody;
 
     [SerializeField] private float bounceForce = 2f;
+    [SerializeField] private float gemResetDelay = 2f;
 
     private void Awake()
     {
@@ -56,7 +57,7 @@ public class GemController : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcGemReset()
+    private void RpcGemReset()
     {
         transform.position = new Vector3(0f, 6f, 0f);
 
@@ -68,5 +69,12 @@ public class GemController : NetworkBehaviour
         {
             collider.enabled = true;
         }
+    }
+
+    public IEnumerator ResetGemBehaviour()
+    {
+        yield return new WaitForSeconds(gemResetDelay);
+
+        RpcGemReset();
     }
 }
