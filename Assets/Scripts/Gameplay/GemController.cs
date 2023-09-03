@@ -7,7 +7,7 @@ public class GemController : NetworkBehaviour
 {
     private MeshRenderer myMeshRenderer;
 
-    private Collider myCollider;
+    private Collider[] myColliders = new Collider[2];
 
     private Rigidbody myRigidbody;
 
@@ -17,7 +17,7 @@ public class GemController : NetworkBehaviour
     {
         myMeshRenderer = GetComponent<MeshRenderer>();
 
-        myCollider = GetComponent<Collider>();
+        myColliders = GetComponents<Collider>();
 
         myRigidbody = GetComponent<Rigidbody>();
     }
@@ -28,7 +28,12 @@ public class GemController : NetworkBehaviour
     {
         myMeshRenderer.enabled = false;
 
-        myCollider.enabled = false;
+        myRigidbody.isKinematic = true;
+
+        foreach(Collider collider in myColliders)
+        {
+            collider.enabled = false;
+        }
     }
 
     [ClientRpc]
@@ -38,7 +43,12 @@ public class GemController : NetworkBehaviour
 
         myMeshRenderer.enabled = true;
 
-        myCollider.enabled = true;
+        foreach(Collider collider in myColliders)
+        {
+            collider.enabled = true;
+        }
+
+        myRigidbody.isKinematic = false;
 
         Vector3 direction = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
 
@@ -50,8 +60,13 @@ public class GemController : NetworkBehaviour
     {
         transform.position = new Vector3(0f, 6f, 0f);
 
+        myRigidbody.isKinematic = false;
+
         myMeshRenderer.enabled = true;
 
-        myCollider.enabled = true;
+        foreach(Collider collider in myColliders)
+        {
+            collider.enabled = true;
+        }
     }
 }
