@@ -1,25 +1,30 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class JoinLobbyMenu : MonoBehaviour
 {
-    
+    #region Attributes
     private NetworkManagerCTG networkManager;
 
+    // For the menus I refrained from gathering references in code, since I
+    // Would have to be searching in transform, which would defeat the purpose
+    // in my opinion.
     [SerializeField] private GameObject landingPagePanel;
 
-    [SerializeField] private TMP_InputField ipAddressInputField
-    ;
-    [SerializeField] private Button joinButton;
+    [SerializeField] private TMP_InputField ipAddressInputField;
 
+    [SerializeField] private Button joinButton;
+    #endregion
+
+    #region MonoBehaviour Methods
     private void Awake()
     {
         networkManager = FindObjectOfType<NetworkManagerCTG>();
     }
 
+    /* Whenever a client connects or disconnects, their menu UI will
+    update automatically. */
     private void OnEnable()
     {
         NetworkManagerCTG.OnClientConnected += HandleClientConnected;
@@ -33,8 +38,10 @@ public class JoinLobbyMenu : MonoBehaviour
 
         NetworkManagerCTG.OnClientDisconnected -= HandleClientDisconnected;
     }
+    #endregion
 
-
+    #region Regular Methods
+    /* This is the behaviour that runs when a client presses the Join button. */
     public void JoinLobby()
     {
         string ipAddress = ipAddressInputField.text;
@@ -48,7 +55,7 @@ public class JoinLobbyMenu : MonoBehaviour
 
     private void HandleClientConnected()
     {
-        joinButton.interactable = true;
+        joinButton.interactable = false;
 
         gameObject.SetActive(false);
 
@@ -59,4 +66,5 @@ public class JoinLobbyMenu : MonoBehaviour
     {
         joinButton.interactable = true;
     }
+    #endregion
 }

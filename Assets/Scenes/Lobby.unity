@@ -444,7 +444,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4410933473155204251, guid: 73ff4feddbd9f0f44a9a57e30170c019, type: 3}
       propertyPath: m_Name
-      value: UI
+      value: MainMenu
       objectReference: {fileID: 0}
     - target: {fileID: 6246394180710046696, guid: 73ff4feddbd9f0f44a9a57e30170c019, type: 3}
       propertyPath: m_LocalPosition.x
